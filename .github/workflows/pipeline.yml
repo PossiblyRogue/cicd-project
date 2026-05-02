@@ -62,8 +62,7 @@ jobs:
           tags: |
             ghcr.io/${{ env.IMAGE_NAME }}:latest
             ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
-
-              # ── Stage 3: Continuous Deployment ─────────────────────────────────────────
+  # ── Stage 3: Continuous Deployment ─────────────────────────────────────────
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
