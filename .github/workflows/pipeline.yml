@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  # ── Stage 1: Continuous Integration ────────────────────────────────────────
+
   test:
     name: Lint and Test
     runs-on: ubuntu-latest
@@ -32,7 +32,6 @@ jobs:
       - name: Run tests
         run: npm test
 
-          # ── Stage 2: Continuous Delivery ───────────────────────────────────────────
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
@@ -65,7 +64,6 @@ jobs:
           tags: |
             ghcr.io/${{ env.IMAGE_NAME }}:latest
             ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
-  # ── Stage 3: Continuous Deployment ─────────────────────────────────────────
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
