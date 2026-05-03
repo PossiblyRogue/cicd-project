@@ -10,6 +10,8 @@ jobs:
   test:
     name: Lint and Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Check out the code
