@@ -1,5 +1,4 @@
 version: '3.8'
-
 # docker-compose.yml — Infrastructure as Code
 #
 # This file defines the local development environment as code.
@@ -9,9 +8,7 @@ version: '3.8'
 #
 # Compare this to a manual setup document: this file IS the setup.
 # It is version-controlled, reviewable, and executable.
-
 services:
-
   # The web application, served by Nginx inside a container.
   # Port 8080 on your machine maps to port 80 inside the container.
   # After running `docker compose up web`, visit http://localhost:8080
@@ -26,7 +23,12 @@ services:
       # Changes you make to files on your machine are immediately reflected
       # inside the container — no need to rebuild the image during development.
       - .:/usr/share/nginx/html:ro
-
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health.html"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
   # A Node.js environment for running the test suite inside a container.
   # This ensures tests run against the same Node.js version as CI,
   # regardless of what you have installed locally.
@@ -37,6 +39,4 @@ services:
     volumes:
       - .:/app
     command: npm test
-    # Prevent the test runner from starting automatically with `docker compose up`
-    profiles:
-      - testing
+    # Prevent the test runner from starting
