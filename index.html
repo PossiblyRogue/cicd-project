@@ -3,176 +3,369 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Text Analyser</title>
-  <meta name="description" content="A simple text analysis tool — built as a CI/CD pipeline demonstration.">
+  <title>Timer App</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f5f5;
-      color: #1a1a1a;
+      background: #0d0d14;
+      color: #f0f0f8;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem 1rem;
-    }
-
-    header {
-      width: 100%;
-      max-width: 720px;
-      margin-bottom: 2rem;
+      padding: 2.5rem 1rem 4rem;
     }
 
     h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-
-    .subtitle {
-      color: #555;
-      font-size: 0.95rem;
-    }
-
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 1.5rem;
-      width: 100%;
-      max-width: 720px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      margin-bottom: 1rem;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 200px;
       font-size: 1rem;
-      font-family: inherit;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 0.75rem;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    textarea:focus {
-      border-color: #0070f3;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-    }
-
-    .stat {
-      text-align: center;
-      padding: 1rem;
-      background: #f9f9f9;
-      border-radius: 8px;
-    }
-
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #0070f3;
-    }
-
-    .stat-label {
-      font-size: 0.8rem;
-      color: #666;
-      margin-top: 0.25rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      color: #55557a;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      margin-bottom: 2.5rem;
     }
 
-    .pipeline-note {
-      font-size: 0.85rem;
-      color: #888;
+    /* ── Tab bar ──────────────────────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      background: #13131e;
+      border: 1px solid #1e1e30;
+      border-radius: 12px;
+      padding: 5px;
+      gap: 4px;
+      margin-bottom: 3.5rem;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 2rem;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: #55558a;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .tab-btn.active { background: #6c5fff; color: #fff; }
+    .tab-btn:not(.active):hover { color: #b0b0d8; }
+
+    /* ── Panels ───────────────────────────────────────────────────────────── */
+    .panel { display: none; }
+    .panel.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.25rem;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    /* ── Time display ─────────────────────────────────────────────────────── */
+    .time-display {
+      font-size: 5.5rem;
+      font-weight: 100;
+      letter-spacing: 0.03em;
+      font-variant-numeric: tabular-nums;
+      color: #fff;
+      line-height: 1;
+    }
+
+    /* ── Buttons ──────────────────────────────────────────────────────────── */
+    .btn-row { display: flex; gap: 0.75rem; }
+
+    .btn {
+      padding: 0.65rem 1.8rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      min-width: 88px;
+      transition: transform 0.1s, filter 0.15s;
+    }
+
+    .btn:hover:not(:disabled) { filter: brightness(1.12); }
+    .btn:active:not(:disabled) { transform: scale(0.95); }
+    .btn:disabled { opacity: 0.3; cursor: default; }
+
+    .btn-start  { background: #6c5fff; color: #fff; }
+    .btn-stop   { background: #e0455a; color: #fff; }
+    .btn-ghost  { background: #181826; color: #b0b0cc; border: 1px solid #22223a; }
+
+    /* ── Lap list ─────────────────────────────────────────────────────────── */
+    .lap-list {
+      width: 100%;
+      max-height: 240px;
+      overflow-y: auto;
+      border-radius: 10px;
+      border: 1px solid #1e1e30;
+      scrollbar-width: thin;
+      scrollbar-color: #2a2a44 transparent;
+    }
+
+    .lap-list:empty { display: none; }
+
+    .lap-header {
+      display: grid;
+      grid-template-columns: 2fr 3fr 3fr;
+      padding: 0.45rem 1rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #3a3a60;
+      background: #0f0f1c;
+      position: sticky;
+      top: 0;
+    }
+
+    .lap-header span:last-child { text-align: right; }
+
+    .lap-item {
+      display: grid;
+      grid-template-columns: 2fr 3fr 3fr;
+      align-items: center;
+      padding: 0.55rem 1rem;
+      border-top: 1px solid #131320;
+      font-size: 0.88rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .lap-num   { color: #44447a; font-weight: 500; }
+    .lap-split { color: #d0d0f0; }
+    .lap-total { color: #55557a; text-align: right; }
+
+    /* ── Countdown inputs ─────────────────────────────────────────────────── */
+    .cd-inputs {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 5.5rem;
+      font-weight: 100;
+      color: #fff;
+    }
+
+    .time-input {
+      width: 2.6ch;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid #2a2a4a;
+      color: #fff;
+      font-size: 5.5rem;
+      font-weight: 100;
       text-align: center;
-      margin-top: 0.5rem;
+      font-variant-numeric: tabular-nums;
+      padding: 0;
+      -moz-appearance: textfield;
     }
 
-    .pipeline-note a {
-      color: #0070f3;
+    .time-input::-webkit-outer-spin-button,
+    .time-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .time-input:focus { outline: none; border-bottom-color: #6c5fff; }
+
+    .cd-sep { margin-bottom: 0.4rem; color: #44446a; }
+
+    /* ── Completion flash ─────────────────────────────────────────────────── */
+    @keyframes done-flash {
+      0%, 100% { background-color: #0d0d14; }
+      50%       { background-color: #2e0b1a; }
     }
+
+    body.flashing { animation: done-flash 0.45s ease 4; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Text Analyser</h1>
-    <p class="subtitle">Type or paste text below to see statistics update in real time.</p>
-  </header>
+  <h1>Timer App</h1>
 
-  <div class="card">
-    <textarea
-      id="input"
-      placeholder="Start typing here, or paste in some text..."
-      autofocus
-    ></textarea>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="stopwatch" onclick="showTab('stopwatch')">Stopwatch</button>
+    <button class="tab-btn" data-tab="countdown" onclick="showTab('countdown')">Countdown</button>
   </div>
 
-  <div class="card">
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-value" id="words">0</div>
-        <div class="stat-label">Words</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value" id="chars">0</div>
-        <div class="stat-label">Characters</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value" id="reading">0</div>
-        <div class="stat-label">Min. read</div>
-      </div>
+  <!-- ── Stopwatch ─────────────────────────────────────────────────────────── -->
+  <div class="panel active" id="tab-stopwatch">
+    <div class="time-display" id="sw-display">00:00.00</div>
+    <div class="btn-row">
+      <button class="btn btn-start" id="sw-toggle-btn" onclick="swToggle()">Start</button>
+      <button class="btn btn-ghost"  id="sw-lap-btn"    onclick="swLap()" disabled>Lap</button>
+      <button class="btn btn-ghost"                     onclick="swReset()">Reset</button>
+    </div>
+    <div class="lap-list" id="sw-laps"></div>
+  </div>
+
+  <!-- ── Countdown ─────────────────────────────────────────────────────────── -->
+  <div class="panel" id="tab-countdown">
+    <div class="cd-inputs" id="cd-inputs">
+      <input class="time-input" id="cd-min" type="number" min="0" max="99" value="5">
+      <span class="cd-sep">:</span>
+      <input class="time-input" id="cd-sec" type="number" min="0" max="59" value="00">
+    </div>
+    <div class="time-display" id="cd-display" style="display:none">05:00.00</div>
+    <div class="btn-row">
+      <button class="btn btn-start" id="cd-start-btn" onclick="cdStart()">Start</button>
+      <button class="btn btn-ghost" id="cd-pause-btn" onclick="cdPause()" disabled>Pause</button>
+      <button class="btn btn-ghost"                   onclick="cdReset()">Reset</button>
     </div>
   </div>
 
-  <p class="pipeline-note">
-    Deployed automatically via a CI/CD pipeline —
-    <a href="https://github.com" target="_blank" rel="noopener">view the source on GitHub</a>
-  </p>
-
   <script>
-    // Inline versions of the functions from src/textUtils.js
-    // In a more complex project, these would be bundled from the source files.
+    // Core logic — inline mirrors of src/utils.js (no bundler available)
+    function pad(n) { return String(n).padStart(2, '0'); }
 
-    function wordCount(text) {
-      if (!text || text.trim() === '') return 0;
-      return text.trim().split(/\s+/).length;
+    function formatTime(ms) {
+      const total = Math.floor(ms / 1000);
+      const min   = Math.floor(total / 60);
+      const sec   = total % 60;
+      const cs    = Math.floor((ms % 1000) / 10);
+      return pad(min) + ':' + pad(sec) + '.' + pad(cs);
     }
 
-    function charCount(text) {
-      if (!text) return 0;
-      return text.replace(/\s/g, '').length;
+    function getRemainingMs(totalMs, elapsedMs) {
+      return Math.max(0, totalMs - elapsedMs);
     }
 
-    function readingTime(text) {
-      const WORDS_PER_MINUTE = 200;
-      const words = wordCount(text);
-      return Math.ceil(words / WORDS_PER_MINUTE);
+    // ── Tab switching ─────────────────────────────────────────────────────── //
+    function showTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === name);
+      });
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
     }
 
-    const input = document.getElementById('input');
-    const wordsEl = document.getElementById('words');
-    const charsEl = document.getElementById('chars');
-    const readingEl = document.getElementById('reading');
+    // ── Stopwatch state ───────────────────────────────────────────────────── //
+    const sw = { running: false, startTime: null, pausedMs: 0, pauseStart: null, lapTs: [], rafId: null };
 
-    function updateStats() {
-      const text = input.value;
-      wordsEl.textContent = wordCount(text);
-      charsEl.textContent = charCount(text);
-      readingEl.textContent = readingTime(text);
+    function swTick() {
+      const elapsed = performance.now() - sw.startTime - sw.pausedMs;
+      document.getElementById('sw-display').textContent = formatTime(elapsed);
+      sw.rafId = requestAnimationFrame(swTick);
     }
 
-    input.addEventListener('input', updateStats);
-    updateStats();
+    function swToggle() {
+      const btn = document.getElementById('sw-toggle-btn');
+      if (!sw.running) {
+        if (sw.pauseStart !== null) {
+          sw.pausedMs  += performance.now() - sw.pauseStart;
+          sw.pauseStart = null;
+        } else {
+          sw.startTime = performance.now();
+          sw.pausedMs  = 0;
+          sw.lapTs     = [];
+          document.getElementById('sw-laps').innerHTML = '';
+        }
+        sw.running       = true;
+        btn.textContent  = 'Stop';
+        btn.className    = 'btn btn-stop';
+        document.getElementById('sw-lap-btn').disabled = false;
+        sw.rafId = requestAnimationFrame(swTick);
+      } else {
+        sw.pauseStart   = performance.now();
+        sw.running      = false;
+        btn.textContent = 'Start';
+        btn.className   = 'btn btn-start';
+        cancelAnimationFrame(sw.rafId);
+      }
+    }
+
+    function swLap() {
+      const elapsed = performance.now() - sw.startTime - sw.pausedMs;
+      sw.lapTs.push(elapsed);
+      const idx   = sw.lapTs.length - 1;
+      const prev  = idx > 0 ? sw.lapTs[idx - 1] : 0;
+      const split = elapsed - prev;
+      const n     = sw.lapTs.length;
+      const lapsEl = document.getElementById('sw-laps');
+      if (n === 1) {
+        lapsEl.innerHTML = '<div class="lap-header"><span></span><span>Lap time</span><span>Total</span></div>';
+      }
+      const row = document.createElement('div');
+      row.className = 'lap-item';
+      row.innerHTML = '<span class="lap-num">Lap ' + n + '</span>' +
+                      '<span class="lap-split">' + formatTime(split)   + '</span>' +
+                      '<span class="lap-total">' + formatTime(elapsed) + '</span>';
+      lapsEl.appendChild(row);
+      lapsEl.scrollTop = lapsEl.scrollHeight;
+    }
+
+    function swReset() {
+      cancelAnimationFrame(sw.rafId);
+      Object.assign(sw, { running: false, startTime: null, pausedMs: 0, pauseStart: null, lapTs: [], rafId: null });
+      document.getElementById('sw-display').textContent = '00:00.00';
+      document.getElementById('sw-laps').innerHTML = '';
+      const btn = document.getElementById('sw-toggle-btn');
+      btn.textContent = 'Start';
+      btn.className   = 'btn btn-start';
+      document.getElementById('sw-lap-btn').disabled = true;
+    }
+
+    // ── Countdown state ───────────────────────────────────────────────────── //
+    const cd = { running: false, totalMs: 0, startTime: null, pausedMs: 0, pauseStart: null, rafId: null };
+
+    function cdTick() {
+      const elapsed    = performance.now() - cd.startTime - cd.pausedMs;
+      const remaining  = getRemainingMs(cd.totalMs, elapsed);
+      document.getElementById('cd-display').textContent = formatTime(remaining);
+      if (remaining <= 0) { cdComplete(); return; }
+      cd.rafId = requestAnimationFrame(cdTick);
+    }
+
+    function cdStart() {
+      if (cd.running) return;
+      if (cd.pauseStart !== null) {
+        cd.pausedMs  += performance.now() - cd.pauseStart;
+        cd.pauseStart = null;
+      } else {
+        const mins  = parseInt(document.getElementById('cd-min').value, 10) || 0;
+        const secs  = parseInt(document.getElementById('cd-sec').value, 10) || 0;
+        cd.totalMs  = (mins * 60 + secs) * 1000;
+        if (cd.totalMs === 0) return;
+        cd.startTime = performance.now();
+        cd.pausedMs  = 0;
+        document.getElementById('cd-inputs').style.display = 'none';
+        const disp = document.getElementById('cd-display');
+        disp.style.display  = '';
+        disp.textContent    = formatTime(cd.totalMs);
+      }
+      cd.running = true;
+      document.getElementById('cd-start-btn').disabled = true;
+      document.getElementById('cd-pause-btn').disabled = false;
+      cd.rafId = requestAnimationFrame(cdTick);
+    }
+
+    function cdPause() {
+      if (!cd.running) return;
+      cd.pauseStart = performance.now();
+      cd.running    = false;
+      cancelAnimationFrame(cd.rafId);
+      document.getElementById('cd-start-btn').disabled = false;
+      document.getElementById('cd-pause-btn').disabled = true;
+    }
+
+    function cdReset() {
+      cancelAnimationFrame(cd.rafId);
+      Object.assign(cd, { running: false, totalMs: 0, startTime: null, pausedMs: 0, pauseStart: null, rafId: null });
+      document.getElementById('cd-display').style.display = 'none';
+      document.getElementById('cd-inputs').style.display  = '';
+      document.getElementById('cd-start-btn').disabled = false;
+      document.getElementById('cd-pause-btn').disabled = true;
+    }
+
+    function cdComplete() {
+      cd.running = false;
+      cancelAnimationFrame(cd.rafId);
+      document.getElementById('cd-display').textContent    = '00:00.00';
+      document.getElementById('cd-start-btn').disabled     = true;
+      document.getElementById('cd-pause-btn').disabled     = true;
+      document.body.classList.add('flashing');
+      document.body.addEventListener('animationend', () => document.body.classList.remove('flashing'), { once: true });
+    }
   </script>
 
 </body>
