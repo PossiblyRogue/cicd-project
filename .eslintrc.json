@@ -13,7 +13,7 @@
     "no-unused-vars": "warn",
     "no-console": "warn",
     "eqeqeq": "error",
-    "semi": ["error", "always"],
+    "semi": ["error", "never"],
     "quotes": ["error", "single"]
   }
 }
