@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Timer App</title>
+  <title>Timer App v2</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -50,7 +50,7 @@
       letter-spacing: 0.02em;
     }
 
-    .tab-btn.active { background: #6c5fff; color: #fff; }
+    .tab-btn.active { background: #10b981; color: #fff; }
     .tab-btn:not(.active):hover { color: #b0b0d8; }
 
     .panel { display: none; }
@@ -89,7 +89,7 @@
     .btn:active:not(:disabled) { transform: scale(0.95); }
     .btn:disabled { opacity: 0.3; cursor: default; }
 
-    .btn-start { background: #6c5fff; color: #fff; }
+    .btn-start { background: #10b981; color: #fff; }
     .btn-stop  { background: #e0455a; color: #fff; }
     .btn-ghost { background: #181826; color: #b0b0cc; border: 1px solid #22223a; }
 
@@ -133,6 +133,7 @@
     .lap-num   { color: #44447a; font-weight: 500; }
     .lap-split { color: #d0d0f0; }
     .lap-total { color: #55557a; text-align: right; }
+    .lap-best .lap-split { color: #10b981; font-weight: 600; }
 
     .cd-inputs {
       display: flex;
@@ -160,7 +161,7 @@
     .time-input::-webkit-outer-spin-button,
     .time-input::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-    .time-input:focus { outline: none; border-bottom-color: #6c5fff; }
+    .time-input:focus { outline: none; border-bottom-color: #10b981; }
 
     .cd-sep { margin-bottom: 0.4rem; color: #44446a; }
 
@@ -174,7 +175,7 @@
 </head>
 <body>
 
-  <h1>Timer App</h1>
+  <h1>Timer App <span style="background:#10b981;color:#fff;font-size:0.65rem;padding:2px 8px;border-radius:20px;letter-spacing:0.05em;vertical-align:middle">v2.0</span></h1>
 
   <div class="tabs">
     <button class="tab-btn active" data-tab="stopwatch" onclick="showTab('stopwatch')">Stopwatch</button>
@@ -282,6 +283,12 @@
                       '<span class="lap-total">' + formatTime(elapsed) + '</span>'
       lapsEl.appendChild(row)
       lapsEl.scrollTop = lapsEl.scrollHeight
+
+      var splits = sw.lapTs.map(function (ts, i) { return i === 0 ? ts : ts - sw.lapTs[i - 1] })
+      var minSplit = Math.min.apply(null, splits)
+      lapsEl.querySelectorAll('.lap-item').forEach(function (item, i) {
+        item.classList.toggle('lap-best', splits[i] === minSplit)
+      })
     }
 
     function swReset () {
@@ -359,7 +366,7 @@
     function cdComplete () {
       cd.running = false
       cancelAnimationFrame(cd.rafId)
-      document.getElementById('cd-display').textContent = '00:00.00'
+      document.getElementById('cd-display').textContent = 'Done!'
       document.getElementById('cd-start-btn').disabled = true
       document.getElementById('cd-pause-btn').disabled = true
       document.body.classList.add('flashing')
