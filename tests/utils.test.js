@@ -1,4 +1,4 @@
-const { pad, formatTime, calculateElapsedMs, recordLap, getLapDuration, parseCountdownMs, getRemainingMs, isCountdownComplete } = require('../src/utils')
+const { pad, formatTime, calculateElapsedMs, recordLap, getLapDuration, parseCountdownMs, getRemainingMs, isCountdownComplete, getBestLapIndex } = require('../src/utils')
 
 describe('pad', () => {
   test('pads a single digit with a leading zero', () => {
@@ -110,5 +110,23 @@ describe('isCountdownComplete', () => {
   })
   test('returns true when remaining time is negative', () => {
     expect(isCountdownComplete(-1)).toBe(true)
+  })
+})
+
+describe('getBestLapIndex', () => {
+  test('returns -1 for an empty lap array', () => {
+    expect(getBestLapIndex([])).toBe(-1)
+  })
+  test('returns 0 for a single lap', () => {
+    expect(getBestLapIndex([5000])).toBe(0)
+  })
+  test('identifies the fastest lap by split time', () => {
+    expect(getBestLapIndex([5000, 8000, 10000])).toBe(2)
+  })
+  test('returns the first occurrence when two laps share the best split', () => {
+    expect(getBestLapIndex([3000, 6000, 9000])).toBe(0)
+  })
+  test('correctly picks the last lap as best', () => {
+    expect(getBestLapIndex([5000, 12000, 13500])).toBe(2)
   })
 })

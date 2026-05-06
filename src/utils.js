@@ -1,15 +1,6 @@
 function pad (n) {
   return String(n).padStart(2, '0')
 }
-function formatLime (ms) {
-  const totalSeconds = Math.floor(ms / 1000)
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-  const centiseconds = Math.floor((ms % 1000) / 10)
-  return `${pad(minutes)}:${pad(seconds)}.${pad(centiseconds)}`
-}
-
-
 function formatTime (ms) {
   const totalSeconds = Math.floor(ms / 1000)
   const minutes = Math.floor(totalSeconds / 60)
@@ -45,4 +36,11 @@ function isCountdownComplete (remainingMs) {
   return remainingMs <= 0
 }
 
-module.exports = { pad, formatTime, calculateElapsedMs, recordLap, getLapDuration, parseCountdownMs, getRemainingMs, isCountdownComplete }
+function getBestLapIndex (lapTimestamps) {
+  if (lapTimestamps.length === 0) return -1
+  const splits = lapTimestamps.map((ts, i) => i === 0 ? ts : ts - lapTimestamps[i - 1])
+  const min = Math.min(...splits)
+  return splits.indexOf(min)
+}
+
+module.exports = { pad, formatTime, calculateElapsedMs, recordLap, getLapDuration, parseCountdownMs, getRemainingMs, isCountdownComplete, getBestLapIndex }
